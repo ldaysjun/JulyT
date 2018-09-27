@@ -13,6 +13,7 @@ func httpGet() {
 	resp, err := http.Get("http://www.01happy.com/demo/accept.php?id=1")
 	if err != nil {
 		// handle error
+		fmt.Println("怎么那么多事情")
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
