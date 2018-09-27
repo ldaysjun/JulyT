@@ -6,6 +6,8 @@ import (
 	"app/julyScheduler"
 	"app/julyTaskPool"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 )
 
 const(
@@ -33,6 +35,7 @@ func NewEngine() *Engine {
 	engine.crawler      = JulySpider.NewCrawler()
 	engine.crawler.SetCrawlerHandle(engine.crawlerPullHandle,engine.crawlerPushHandle)
 	engine.downLoad = julyNet.NewDownLoad()
+	engine.downLoad.DownFinishHandle = engine.downFinishHandle
 
 	return engine
 }
@@ -111,13 +114,32 @@ func (engine *Engine)crawlerPullHandle(spider *JulySpider.Spider)  {
 }
 //spider入队处理
 func (engine *Engine)crawlerPushHandle() {
-
+	fmt.Println("入队")
 }
 
 /*Download相关处理函数*/
 //下载完成处理
-func (engine *Engine)downFinishHandle(){
-	
+func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
+
+	fmt.Println("uuid:",uuid)
+	b,_ := ioutil.ReadAll(rsp.Body)
+	spiders := engine.crawler.Process
+	spider := spiders[uuid]
+	spider.Parse.Parse(string(b))
+
+
+
+	//node,err:=Xpath.ParseHTML(inputReader)
+	//fmt.Println("结果")
+	//
+	//if err != nil {
+	//	fmt.Println("xmlpath parse file failed!!!")
+	//	return
+	//}
+	//
+	//path := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
+	//fmt.Println(path.String(node))
+
 }
 
 

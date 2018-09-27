@@ -2,7 +2,7 @@ package JulySpider
 
 import (
 	"app/julyNet"
-	"app/julyUtils/julyUuid"
+	"fmt"
 )
 
 type Spider struct {
@@ -16,7 +16,10 @@ func (spider *Spider)Registered()  {
 
 	crawler := NewCrawler()
 	if spider.Request != nil {
-		spider.Request.UUID = julyUuid.GenerateUuid()
+		//uuidData,_ :=uuid.NewUUID()
+		//spider.Request.UUID = uuidData.String()
+		fmt.Println("注册uuid：",spider.Request.UUID)
+		fmt.Println("spidername:",spider.SpiderName)
 		crawler.PushSpider(spider)
 	}
 }

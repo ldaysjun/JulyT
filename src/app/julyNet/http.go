@@ -1,11 +1,13 @@
 package julyNet
 
 import (
+	"app/JulySpider/Xpath"
 	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
+	"strings"
 	"time"
 )
 
@@ -17,6 +19,33 @@ type JulyHttp struct {
 func NewJulyHttp() Downer {
 	s := new(JulyHttp)
 	return s
+}
+
+func parseddd(body string)  {
+	fmt.Println("测试代码走起")
+	inputReader := strings.NewReader(string(body))
+	node,err:=Xpath.ParseHTML(inputReader)
+
+	if err != nil {
+		fmt.Println("xmlpath parse file failed!!!")
+		return
+	}
+
+	path := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
+	fmt.Println(path.String(node))
+
+
+	inputReader2 := strings.NewReader(string(body))
+	node2,err2:=Xpath.ParseHTML(inputReader2)
+
+	if err2 != nil {
+		fmt.Println("xmlpath parse file failed!!!")
+		return
+	}
+
+	path2 := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
+	fmt.Println(path2.String(node2))
+
 }
 
 func (self *JulyHttp) DownLoad(request *CrawlRequest) (rsp *http.Response, err error) {
@@ -33,7 +62,11 @@ func (self *JulyHttp) DownLoad(request *CrawlRequest) (rsp *http.Response, err e
 	}
 
 
+
+
 	//b,err := ioutil.ReadAll(rsp.Body)
+	//defer rsp.Body.Close()
+	//parseddd(string(b))
 	//inputReader := strings.NewReader(string(b))
 	//node,err := ParseHTML(inputReader)
 	//
@@ -44,7 +77,7 @@ func (self *JulyHttp) DownLoad(request *CrawlRequest) (rsp *http.Response, err e
 	//path := xmlpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
 	//fmt.Println(path.String(node))
 
-	return
+	return rsp,err
 }
 
 func (self *JulyHttp) createClient(param *Param) *http.Client {
@@ -80,7 +113,7 @@ func (self *JulyHttp) createClient(param *Param) *http.Client {
 }
 
 func (self *JulyHttp) httpRequest(param *Param) (rsp *http.Response, err error) {
-	println("httpRequest")
+	fmt.Println("httpRequest")
 	req, err := http.NewRequest(param.method, param.url.String(), param.body)
 	if err != nil {
 		return nil, err

@@ -1,13 +1,14 @@
 package julyNet
 
 import (
+	"fmt"
 	"net/http"
 )
 
 
 type Downloader struct {
 	julyHttp Downer
-	downFinishHandle func(rsp *http.Response)
+	DownFinishHandle func(rsp *http.Response,uuid string)
 }
 
 func NewDownLoad() *Downloader{
@@ -18,8 +19,9 @@ func NewDownLoad() *Downloader{
 
 func (d *Downloader)DownLoad(req *CrawlRequest) (rsp *http.Response, err error) {
 	rsp, err = d.julyHttp.DownLoad(req)
-	if d.downFinishHandle !=nil {
-		d.downFinishHandle(rsp)
+	if d.DownFinishHandle !=nil {
+		fmt.Println("DownFinishHandle")
+		d.DownFinishHandle(rsp,req.UUID)
 	}
 	return
 }

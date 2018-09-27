@@ -11,7 +11,7 @@ var lock *sync.Mutex = &sync.Mutex {}
 
 type Crawler struct {
 	spiders []*Spider						//待处理爬虫实例
-	process map[string]*Spider
+	Process map[string]*Spider
 
 	crawlerPullHandle func(spider *Spider)	//拉取spider处理函数
 	crawlerPushHandle func()				//spider入队处理函数
@@ -27,7 +27,7 @@ func NewCrawler() *Crawler{
 
 		crawler= new(Crawler)
 		crawler.spiders = make([]*Spider,0)
-		crawler.process = make(map[string]*Spider)
+		crawler.Process = make(map[string]*Spider)
 	}
 	return crawler
 }
@@ -61,8 +61,8 @@ func (crawler *Crawler)PullSpider() {
 	crawler.spiders = crawler.spiders[1:]
 
 	//将spider添加到处理队列
-	if _,found:=crawler.process[spider.Request.Url];!found {
-		crawler.process[spider.Request.UUID] = spider
+	if _,found:=crawler.Process[spider.Request.Url];!found {
+		crawler.Process[spider.Request.UUID] = spider
 	}
 
 	if crawler.crawlerPullHandle != nil {
