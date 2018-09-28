@@ -28,7 +28,6 @@ func NewMatrix() *Matrix {
 	matrix.resCount = 0
 	matrix.dupeFilter = NewDupeFilter(nil)
 	return matrix
-
 }
 
 

@@ -7,6 +7,7 @@ import (
 	"app/julyTaskPool"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"sync"
 )
@@ -30,7 +31,7 @@ func NewEngine() *Engine {
 	engine := new(Engine)
 
 	//初始化各个组件
-	engine.taskPool     = julyTaskPool.NewTaskPool(3,50,false)
+	engine.taskPool     = julyTaskPool.NewTaskPool(1000,50,false)
 	engine.requestQueue = julyScheduler.NewQueue(engine.queuePullHandle,engine.queueAfterPushHandle)
 	engine.crawler      = JulySpider.NewCrawler()
 	engine.crawler.SetCrawlerHandle(engine.crawlerPullHandle,engine.crawlerPushHandle)
@@ -40,34 +41,13 @@ func NewEngine() *Engine {
 	return engine
 }
 
-func (engine *Engine)Run(){
-	//engine.listenQueue()
-	//engine.listenCrawler()
-	//engine.taskPool.SubmitTask(func() error {
-	//	fmt.Println("Run1 当前id:",GoID(),"|","uuid:",1)
-	//	req := new(julyNet.CrawlRequest)
-	//	req.Url = "http://lastdays.cn/"
-	//	req.NotFilter =true
-	//	req.UUID = "1"
-	//	engine.requestQueue.PushRequest(req)
-	//	return nil
-	//})
-	//
-	//
-	//engine.taskPool.SubmitTask(func() error {
-	//	fmt.Println("Run2 当前id:",GoID(),"|","uuid:",2)
-	//	req := new(julyNet.CrawlRequest)
-	//	req.Url = "http://lastdays.cn/"
-	//	req.NotFilter =true
-	//	req.UUID = "2"
-	//	engine.requestQueue.PushRequest(req)
-	//	return nil
-	//})
+func Run() *Engine{
+	log.Println("启动JulyT")
+	engine:=NewEngine()
+	return engine
 }
 
-
 func (engine *Engine)listenQueue() {
-	fmt.Println("监听queue")
 	queue := engine.requestQueue
 	engine.taskPool.SubmitTask(func() error {
 		for  {
@@ -79,25 +59,29 @@ func (engine *Engine)listenQueue() {
 	})
 }
 
+func (engine *Engine)CloseEngine()  {
+	engine.taskPool.CloseTaskPool()
+}
+
 //监听Crawler，如果有数据立刻处理
 func (engine *Engine)listenCrawler(){
-	fmt.Println("监听Crawler")
-	crawler := engine.crawler
-
-	engine.taskPool.SubmitTask(func() error {
-		for  {
-			spiders := crawler.GetSpiders()
-			if len(spiders)>0 {
-				crawler.PullSpider()
-			}
-		}
-		return nil
-	})
+	//fmt.Println("监听Crawler")
+	//crawler := engine.crawler
+	//
+	//engine.taskPool.SubmitTask(func() error {
+	//	for  {
+	//		spiders := crawler.GetSpiders()
+	//		if len(spiders)>0 {
+	//			crawler.PullSpider()
+	//		}
+	//	}
+	//	return nil
+	//})
 }
 
 //添加数据到Queue
 func (engine *Engine)pushRequestToQueue(request *julyNet.CrawlRequest)  {
-	fmt.Println("添加数据",request.Url)
+	//fmt.Println("添加数据",request.Url)
 	//engine.taskPool.SubmitTask(func() error {
 	//	//time.Sleep(2*time.Second)
 	//
@@ -128,7 +112,7 @@ func (engine *Engine)queuePullHandle(request *julyNet.CrawlRequest)  {
 /*Crawler相关处理函数*/
 //提取spider处理
 func (engine *Engine)crawlerPullHandle(spider *JulySpider.Spider)  {
-	fmt.Println("crawlerPullHandle 当前id:",GoID(),"|","uuid:",spider.Request.UUID)
+	//fmt.Println("crawlerPullHandle 当前id:",GoID(),"|","uuid:",spider.Request.UUID)
 	engine.pushRequestToQueue(spider.Request)
 }
 //spider入队处理
@@ -136,11 +120,11 @@ func (engine *Engine)crawlerPushHandle() {
 	fmt.Println("入队")
 
 	engine.taskPool.SubmitTask(func() error {
-		spiders := engine.crawler.GetSpiders()
-		if len(spiders)>0 {
-			fmt.Println("crawlerPushHandle 当前id:",GoID(),"|","uuid:")
-			engine.crawler.PullSpider()
-		}
+		//spiders := engine.crawler.GetSpiders()
+		//if len(spiders)>0 {
+		//
+		//}
+		engine.crawler.PullSpider()
 		return nil
 	})
 }
@@ -148,27 +132,20 @@ func (engine *Engine)crawlerPushHandle() {
 /*Download相关处理函数*/
 //下载完成处理
 func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
-
-	fmt.Println("downFinishHandle 当前id:",GoID(),"|","uuid:",uuid)
-
-
-	fmt.Println("uuid:",uuid)
-	b,_ := ioutil.ReadAll(rsp.Body)
+	body,err:= ioutil.ReadAll(rsp.Body)
+	if err!=nil {
+		log.Println(err.Error())
+	}
 	spiders := engine.crawler.Process
 	spider := spiders[uuid]
-	if spider != nil && spider.Parse.Parse!=nil{
-		spider.Parse.Parse(string(b))
+	if spider != nil && spider.Parse!=nil{
+		fmt.Println("当前uuid：",uuid)
+		spider.Parse.Parse(string(body))
 	}
-
-	//inputReader := strings.NewReader(string(body))
-	//node,err:=Xpath.ParseHTML(resp.Body)
-	//if err != nil {
-	//	fmt.Println("xmlpath parse file failed!!!")
-	//	return
-	//}
-	//path := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
-	//fmt.Println(path.String(node))
 }
+
+
+
 
 
 func GoID() int {

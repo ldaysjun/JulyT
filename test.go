@@ -1,13 +1,12 @@
 package main
 
 import (
-	"app/JulySpider"
 	"app/JulySpider/Xpath"
 	"app/julyEngine"
 	"app/julyNet"
 	"fmt"
 	"io/ioutil"
-	"strconv"
+	"time"
 
 	//"net/http"
 	"strings"
@@ -50,7 +49,8 @@ func parseddd(body string)  {
 	}
 
 	path := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
-	fmt.Println(path.String(node))
+	result,_ := path.String(node)
+	fmt.Println("输出结果：",result)
 
 
 	//inputReader2 := strings.NewReader(string(body))
@@ -81,89 +81,42 @@ func parsedd(body string)  {
 
 	path := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
 	fmt.Println(path.String(node))
-	fmt.Println("结束llll")
+	//fmt.Println("结束llll")
 
 }
 
 var complete chan int = make(chan int)
 
-
-
 //测试任务池
 func main()  {
+	fmt.Println("开始测试")
+	engine := julyEngine.Run()
+	t:=3
+	go func() {
+		time.Sleep(2*time.Second)
+		fmt.Println("关闭")
+		engine.CloseEngine()
 
-	//go httpGet()
-	//go httpGet()
+		//v:=<-complete
+		//fmt.Println(v)
+	}(t)
 
-	//req := new(julyNet.CrawlRequest)
-	//req.Url = "http://lastdays.cn/"
-	//req.NotFilter =true
+
+
+
+	//for i:=0;i<20; i++ {
+	//	req2 := new(julyNet.CrawlRequest)
+	//	req2.UUID = strconv.Itoa(i)
+	//	req2.Url = "http://lastdays.cn/"
+	//	req2.NotFilter = true
 	//
-	//downLoad := julyNet.NewDownLoad()
-	//downLoad.DownLoad(req)
-
-
-	//
-	//fmt.Println("开始测试")
-	engine:=julyEngine.NewEngine()
-
-	engine.Run()
-	//fmt.Println("初始化完毕")
-	////
-	//for i:=0;i<100;i++ {
-		//req := new(julyNet.CrawlRequest)
-		//fmt.Println()
-		//req.Url ="wwww:"+strconv.Itoa(i)
-		//req.Proxy = "web-proxy.tencent.com:8080"
-		//
-		//spider:=&JulySpider.Spider{
-		//	Request:req,
-		//}
-		//spider.Registered()
-		//time.Sleep(time.Second*1)
-		//uuid := julyUuid.GenerateUuid()
-		//fmt.Println(uuid)
+	//	spider2 := new(JulySpider.Spider)
+	//	spider2.SpiderName = "测试1"
+	//	spider2.Parse = JulySpider.Parse(parseddd)
+	//	spider2.Request = req2
+	//	spider2.Registered()
 	//}
 
-
-	//req := new(julyNet.CrawlRequest)
-	//req.Url = "http://lastdays.cn/"
-	//req.NotFilter =true
-	//req.UUID = "1"
-	//
-	//spider := new(JulySpider.Spider)
-	//spider.Parse = JulySpider.Parse(parseddd)
-	//spider.Request = req
-	//spider.SpiderName = "测试2"
-	//spider.Registered()
-
-	for i:=0;i<1000; i++ {
-		req2 := new(julyNet.CrawlRequest)
-		req2.UUID = strconv.Itoa(i)
-		req2.Url = "http://lastdays.cn/"
-		req2.NotFilter = true
-
-		spider2 := new(JulySpider.Spider)
-		spider2.SpiderName = "测试1"
-		spider2.Parse = JulySpider.Parse(parsedd)
-		spider2.Request = req2
-		spider2.Registered()
-	}
-
-	//time.Sleep(3*time.Second)
-
-
-
-	//req := new(julyNet.CrawlRequest)
-	//fmt.Println()
-	//req.Url ="wwww:"+strconv.Itoa(11)
-	//engine.PushRequestToQueue(req)
-
-	//julyNet.DownLoad(julyNet.CrawlRequest{
-	//	Url:"http://lastdays.cn/",
-	//})
-	//
-	//fmt.Println("//*[@id=\"main\"]/article[1]/header/h1/a")
 	complete <- 0
 }
 

@@ -51,7 +51,6 @@ func (queue *Queue)PushRequest(request *julyNet.CrawlRequest)  {
 func (queue *Queue)PullRequest() (request *julyNet.CrawlRequest){
 
 	request =queue.matrix.pullRequest()
-
 	if request!=nil && queue.pullHandle!=nil{
 		queue.pullHandle(request)
 	}

@@ -93,7 +93,6 @@ func NewTaskPool(poolSize int32, expiredDuration int, isUseCache bool) *TaskPool
 	}
 
 	return pool
-
 }
 
 //提交任务，由内部调度分配
@@ -212,7 +211,7 @@ func (p *TaskPool) idleNodeGC() {
 
 	ticker := time.NewTicker(p.expiredDuration)
 	tempNodes := p.taskNodes
-	for _ = range ticker.C {
+	for _= range ticker.C {
 
 		p.lock.Lock()
 		defer p.lock.Unlock()

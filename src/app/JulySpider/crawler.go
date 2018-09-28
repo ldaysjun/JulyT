@@ -1,7 +1,6 @@
 package JulySpider
 
 import (
-	"fmt"
 	//"github.com/google/uuid"
 	//"strconv"
 	"sync"
@@ -12,12 +11,11 @@ var lock *sync.Mutex = &sync.Mutex {}
 
 
 type Crawler struct {
-	spiders []*Spider						//待处理爬虫实例
+	//资源矩阵
+	matrix *Matrix
 	Process map[string]*Spider
-
 	crawlerPullHandle func(spider *Spider)	//拉取spider处理函数
 	crawlerPushHandle func()				//spider入队处理函数
-	lock sync.Mutex							//保证线程安全
 }
 
 
@@ -28,21 +26,15 @@ func NewCrawler() *Crawler{
 		defer lock.Unlock()
 
 		crawler= new(Crawler)
-		crawler.spiders = make([]*Spider,0)
 		crawler.Process = make(map[string]*Spider)
+		crawler.matrix = NewMatrix()
 	}
 	return crawler
 }
 
 //spider入队、如果需要异步入队，需要加锁
 func (crawler *Crawler)PushSpider(spider *Spider)  {
-
-	//crawler.lock.Lock()
-	if spider == nil {
-		return
-	}
-	crawler.spiders = append(crawler.spiders, spider)
-	//crawler.lock.Unlock()
+	crawler.matrix.pushSpider(spider)
 
 	if crawler.crawlerPushHandle != nil{
 		crawler.crawlerPushHandle()
@@ -51,25 +43,9 @@ func (crawler *Crawler)PushSpider(spider *Spider)  {
 
 //提取spider
 func (crawler *Crawler)PullSpider() {
-	crawler.lock.Lock()
-	defer crawler.lock.Unlock()
+	spider := crawler.matrix.pullSpider()
 
-
-	n := len(crawler.spiders)
-	if n<= 0 {
-		return
-	}
-
-	spider := crawler.spiders[0]
-	crawler.spiders = crawler.spiders[1:]
-
-
-	//将spider添加到处理队列
-	if _,found:=crawler.Process[spider.Request.UUID];!found {
-		fmt.Println("spider.Request:",spider.Request)
-		crawler.Process[spider.Request.UUID] = spider
-	}
-	if crawler.crawlerPullHandle != nil {
+	if crawler.crawlerPullHandle != nil && spider!=nil{
 		crawler.crawlerPullHandle(spider)
 	}
 }
@@ -83,10 +59,6 @@ func (crawler *Crawler)SetCrawlerHandle(crawlerPullHandle func(spider *Spider),c
 	if crawlerPushHandle!=nil {
 		crawler.crawlerPushHandle = crawlerPushHandle
 	}
-}
-
-func (crawler *Crawler)GetSpiders()[]*Spider{
-	return crawler.spiders
 }
 
 
