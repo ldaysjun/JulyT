@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"sync"
 )
 
 const(
@@ -21,8 +22,7 @@ type Engine struct {
 	crawler      *JulySpider.Crawler        //爬虫服务
 	downLoad     *julyNet.Downloader
 	status       int	                    //Engine状态
-
-
+	lock         sync.Mutex
 }
 
 func NewEngine() *Engine {
@@ -30,7 +30,7 @@ func NewEngine() *Engine {
 	engine := new(Engine)
 
 	//初始化各个组件
-	engine.taskPool     = julyTaskPool.NewTaskPool(11,50,false)
+	engine.taskPool     = julyTaskPool.NewTaskPool(3,50,false)
 	engine.requestQueue = julyScheduler.NewQueue(engine.queuePullHandle,engine.queueAfterPushHandle)
 	engine.crawler      = JulySpider.NewCrawler()
 	engine.crawler.SetCrawlerHandle(engine.crawlerPullHandle,engine.crawlerPushHandle)
@@ -42,7 +42,27 @@ func NewEngine() *Engine {
 
 func (engine *Engine)Run(){
 	//engine.listenQueue()
-	engine.listenCrawler()
+	//engine.listenCrawler()
+	//engine.taskPool.SubmitTask(func() error {
+	//	fmt.Println("Run1 当前id:",GoID(),"|","uuid:",1)
+	//	req := new(julyNet.CrawlRequest)
+	//	req.Url = "http://lastdays.cn/"
+	//	req.NotFilter =true
+	//	req.UUID = "1"
+	//	engine.requestQueue.PushRequest(req)
+	//	return nil
+	//})
+	//
+	//
+	//engine.taskPool.SubmitTask(func() error {
+	//	fmt.Println("Run2 当前id:",GoID(),"|","uuid:",2)
+	//	req := new(julyNet.CrawlRequest)
+	//	req.Url = "http://lastdays.cn/"
+	//	req.NotFilter =true
+	//	req.UUID = "2"
+	//	engine.requestQueue.PushRequest(req)
+	//	return nil
+	//})
 }
 
 
@@ -78,11 +98,12 @@ func (engine *Engine)listenCrawler(){
 //添加数据到Queue
 func (engine *Engine)pushRequestToQueue(request *julyNet.CrawlRequest)  {
 	fmt.Println("添加数据",request.Url)
-	engine.taskPool.SubmitTask(func() error {
-		//time.Sleep(2*time.Second)
-		engine.requestQueue.PushRequest(request)
-		return nil
-	})
+	//engine.taskPool.SubmitTask(func() error {
+	//	//time.Sleep(2*time.Second)
+	//
+	//	return nil
+	//})
+	engine.requestQueue.PushRequest(request)
 }
 
 //下载HTML
@@ -95,31 +116,41 @@ func (engine *Engine)downloadHTML(req *julyNet.CrawlRequest)  {
 /*Queue相关处理函数*/
 //队列入队后相关操作
 func (engine *Engine)queueAfterPushHandle() {
-	fmt.Println("入队后处理")
 	engine.requestQueue.PullRequest()
 }
 
 //队列拉取处理
 func (engine *Engine)queuePullHandle(request *julyNet.CrawlRequest)  {
-	fmt.Println("当前Url:",request.Url)
 	engine.downloadHTML(request)
-
 }
 
 
 /*Crawler相关处理函数*/
 //提取spider处理
 func (engine *Engine)crawlerPullHandle(spider *JulySpider.Spider)  {
+	fmt.Println("crawlerPullHandle 当前id:",GoID(),"|","uuid:",spider.Request.UUID)
 	engine.pushRequestToQueue(spider.Request)
 }
 //spider入队处理
 func (engine *Engine)crawlerPushHandle() {
 	fmt.Println("入队")
+
+	engine.taskPool.SubmitTask(func() error {
+		spiders := engine.crawler.GetSpiders()
+		if len(spiders)>0 {
+			fmt.Println("crawlerPushHandle 当前id:",GoID(),"|","uuid:")
+			engine.crawler.PullSpider()
+		}
+		return nil
+	})
 }
 
 /*Download相关处理函数*/
 //下载完成处理
 func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
+
+	fmt.Println("downFinishHandle 当前id:",GoID(),"|","uuid:",uuid)
+
 
 	fmt.Println("uuid:",uuid)
 	b,_ := ioutil.ReadAll(rsp.Body)
@@ -127,23 +158,27 @@ func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
 	spider := spiders[uuid]
 	spider.Parse.Parse(string(b))
 
-
-
-	//node,err:=Xpath.ParseHTML(inputReader)
-	//fmt.Println("结果")
-	//
+	//inputReader := strings.NewReader(string(body))
+	//node,err:=Xpath.ParseHTML(resp.Body)
 	//if err != nil {
 	//	fmt.Println("xmlpath parse file failed!!!")
 	//	return
 	//}
-	//
 	//path := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
 	//fmt.Println(path.String(node))
-
 }
 
 
-
+func GoID() int {
+	//var buf [64]byte
+	//n := runtime.Stack(buf[:], false)
+	//idField := strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]
+	//id, err := strconv.Atoi(idField)
+	//if err != nil {
+	//	panic(fmt.Sprintf("cannot get goroutine id: %v", err))
+	//}
+	return 0
+}
 
 
 

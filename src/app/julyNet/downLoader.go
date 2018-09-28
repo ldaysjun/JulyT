@@ -1,7 +1,6 @@
 package julyNet
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -20,10 +19,9 @@ func NewDownLoad() *Downloader{
 func (d *Downloader)DownLoad(req *CrawlRequest) (rsp *http.Response, err error) {
 	rsp, err = d.julyHttp.DownLoad(req)
 	if d.DownFinishHandle !=nil {
-		fmt.Println("DownFinishHandle")
 		d.DownFinishHandle(rsp,req.UUID)
 	}
-	return
+	return rsp,err
 }
 
 type Downer interface {

@@ -34,7 +34,7 @@ func parseddd(body string)  {
 	path := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
 	fmt.Println(path.String(node))
 
-
+	fmt.Println("完成1")
 	inputReader2 := strings.NewReader(string(body))
 	node2,err2:=Xpath.ParseHTML(inputReader2)
 
@@ -45,6 +45,7 @@ func parseddd(body string)  {
 
 	path2 := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
 	fmt.Println(path2.String(node2))
+	fmt.Println("完成2")
 
 }
 

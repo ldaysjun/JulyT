@@ -190,13 +190,15 @@ func (p *TaskPool) getNodeFromTaskNodes() *TaskNode {
 
 //返回空闲队列
 func (p *TaskPool) taskNodeGC(node *TaskNode) error {
-	fmt.Println("进入回收")
+
 	if node == nil {
 		return ErrorGCNodeIsNil
 	}
 
 	p.lock.Lock()
 	defer p.lock.Unlock()
+
+	fmt.Println("回收节点")
 
 	node.recentUsageTime = time.Now()
 	node.isIdel = true
@@ -215,7 +217,6 @@ func (p *TaskPool) idleNodeGC() {
 		p.lock.Lock()
 		defer p.lock.Unlock()
 
-		fmt.Println("开始执行空闲节点回收")
 		nowTime := time.Now()
 		if len(p.closeNotice) <= 0 {
 			return

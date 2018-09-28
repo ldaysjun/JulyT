@@ -1,7 +1,6 @@
 package JulySpider
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -34,7 +33,6 @@ func NewCrawler() *Crawler{
 
 //spider入队
 func (crawler *Crawler)PushSpider(spider *Spider)  {
-	fmt.Println("注册成功：",spider.Request.Url)
 
 	if spider == nil {
 		return
@@ -61,7 +59,7 @@ func (crawler *Crawler)PullSpider() {
 	crawler.spiders = crawler.spiders[1:]
 
 	//将spider添加到处理队列
-	if _,found:=crawler.Process[spider.Request.Url];!found {
+	if _,found:=crawler.Process[spider.Request.UUID];!found {
 		crawler.Process[spider.Request.UUID] = spider
 	}
 
