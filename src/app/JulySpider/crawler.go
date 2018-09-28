@@ -1,6 +1,9 @@
 package JulySpider
 
 import (
+	"fmt"
+	//"github.com/google/uuid"
+	//"strconv"
 	"sync"
 )
 
@@ -31,24 +34,26 @@ func NewCrawler() *Crawler{
 	return crawler
 }
 
-//spider入队
+//spider入队、如果需要异步入队，需要加锁
 func (crawler *Crawler)PushSpider(spider *Spider)  {
 
+	//crawler.lock.Lock()
 	if spider == nil {
 		return
 	}
+	crawler.spiders = append(crawler.spiders, spider)
+	//crawler.lock.Unlock()
 
 	if crawler.crawlerPushHandle != nil{
 		crawler.crawlerPushHandle()
 	}
-
-	crawler.spiders = append(crawler.spiders, spider)
 }
 
 //提取spider
 func (crawler *Crawler)PullSpider() {
 	crawler.lock.Lock()
 	defer crawler.lock.Unlock()
+
 
 	n := len(crawler.spiders)
 	if n<= 0 {
@@ -58,11 +63,12 @@ func (crawler *Crawler)PullSpider() {
 	spider := crawler.spiders[0]
 	crawler.spiders = crawler.spiders[1:]
 
+
 	//将spider添加到处理队列
 	if _,found:=crawler.Process[spider.Request.UUID];!found {
+		fmt.Println("spider.Request:",spider.Request)
 		crawler.Process[spider.Request.UUID] = spider
 	}
-
 	if crawler.crawlerPullHandle != nil {
 		crawler.crawlerPullHandle(spider)
 	}
@@ -74,7 +80,6 @@ func (crawler *Crawler)SetCrawlerHandle(crawlerPullHandle func(spider *Spider),c
 	if crawlerPullHandle!=nil {
 		crawler.crawlerPullHandle = crawlerPullHandle
 	}
-
 	if crawlerPushHandle!=nil {
 		crawler.crawlerPushHandle = crawlerPushHandle
 	}

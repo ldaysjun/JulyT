@@ -114,7 +114,8 @@ func (self *JulyHttp) createClient(param *Param) *http.Client {
 }
 
 func (self *JulyHttp) httpRequest(param *Param) (rsp *http.Response, err error) {
-	fmt.Println("httpRequest")
+	fmt.Println("httpRequest：",)
+
 	req, err := http.NewRequest(param.method, param.url.String(), param.body)
 	if err != nil {
 		return nil, err

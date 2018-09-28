@@ -156,7 +156,9 @@ func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
 	b,_ := ioutil.ReadAll(rsp.Body)
 	spiders := engine.crawler.Process
 	spider := spiders[uuid]
-	spider.Parse.Parse(string(b))
+	if spider != nil && spider.Parse.Parse!=nil{
+		spider.Parse.Parse(string(b))
+	}
 
 	//inputReader := strings.NewReader(string(body))
 	//node,err:=Xpath.ParseHTML(resp.Body)

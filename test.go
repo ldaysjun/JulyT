@@ -154,11 +154,6 @@ func main()  {
 
 
 
-
-
-
-
-
 	//req := new(julyNet.CrawlRequest)
 	//fmt.Println()
 	//req.Url ="wwww:"+strconv.Itoa(11)
