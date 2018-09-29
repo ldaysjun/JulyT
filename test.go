@@ -39,8 +39,18 @@ func parsedd(body string)  {
 		fmt.Println("xmlpath parse file failed!!!")
 		return
 	}
-	path := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
-	fmt.Println(path.String(node))
+	path := Xpath.MustCompile("//*[@id=\"archive-page\"]/section")
+	it := path.Iter(node)
+	fmt.Println(it)
+
+	for it.Next() {
+		titlePath := Xpath.MustCompile("a/@title")
+		urlPath := Xpath.MustCompile("a/@href")
+		fmt.Println(titlePath.String(it.Node()))
+		fmt.Println(urlPath.String(it.Node()))
+		fmt.Println("=======+==========")
+	}
+
 
 }
 
@@ -51,16 +61,13 @@ func main()  {
 	fmt.Println("开始测试")
 	julyEngine.Run()
 
-
-	for i:=0;i<20; i++ {
+	for i:=0;i<1; i++ {
 		req2 := new(julyNet.CrawlRequest)
-		//req2.UUID = strconv.Itoa(i)
-		req2.Url = "http://lastdays.cn/"
+		req2.Url = "http://lastdays.cn/archives/"
 		req2.NotFilter = true
-
 		spider2 := new(JulySpider.Spider)
 		spider2.SpiderName = "测试1"
-		spider2.Parse = JulySpider.Parse(parseddd)
+		spider2.Parse = JulySpider.Parse(parsedd)
 		spider2.Request = req2
 		spider2.Registered()
 	}
