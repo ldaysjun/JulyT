@@ -3,6 +3,7 @@ package JulySpider
 import (
 	//"github.com/google/uuid"
 	//"strconv"
+	"app/julyNet"
 	"sync"
 )
 
@@ -16,6 +17,7 @@ type Crawler struct {
 	Process map[string]*Spider
 	crawlerPullHandle func(spider *Spider)	//拉取spider处理函数
 	crawlerPushHandle func()				//spider入队处理函数
+	CrawlerPushRequestHandle func(request *julyNet.CrawlRequest)
 }
 
 
@@ -35,6 +37,12 @@ func NewCrawler() *Crawler{
 //spider入队、如果需要异步入队，需要加锁
 func (crawler *Crawler)PushSpider(spider *Spider)  {
 	crawler.matrix.pushSpider(spider)
+
+	if spider.SonSpider {
+		if crawler.CrawlerPushRequestHandle!=nil {
+			crawler.CrawlerPushRequestHandle(spider.Request)
+		}
+	}
 
 	if crawler.crawlerPushHandle != nil{
 		crawler.crawlerPushHandle()
@@ -60,6 +68,15 @@ func (crawler *Crawler)SetCrawlerHandle(crawlerPullHandle func(spider *Spider),c
 		crawler.crawlerPushHandle = crawlerPushHandle
 	}
 }
+
+
+//用于直连
+func (crawler *Crawler)PushRequestToEngine(request *julyNet.CrawlRequest){
+	if crawler.CrawlerPushRequestHandle!=nil{
+		crawler.CrawlerPushRequestHandle(request)
+	}
+}
+
 
 
 

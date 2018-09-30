@@ -3,6 +3,7 @@ package JulySpider
 import (
 	"app/JulySpider/Xpath"
 	"app/julyNet"
+	"fmt"
 	"github.com/google/uuid"
 )
 
@@ -10,6 +11,7 @@ type Spider struct {
 	Parse Analysis    //处理入口
 	NextStep Analysis //下一步处理
 	SpiderName string //Spider名字
+	SonSpider bool
 	Request *julyNet.CrawlRequest
 }
 
@@ -20,17 +22,19 @@ func (spider *Spider)Registered()  {
 	if spider.Request != nil {
 		uuidData,_ :=uuid.NewUUID()
 		spider.Request.UUID = uuidData.String()
-
 		crawler.PushSpider(spider)
-	}
+		}
 }
 
 func (spider *Spider)RunNextStep(url string,nextStep func(node *Xpath.Node,spider *Spider))  {
+	fmt.Println("这里")
 	nextStepSpider := new(Spider)
 	req := new(julyNet.CrawlRequest)
 	req.Url = url
+	fmt.Println(url)
 	nextStepSpider.Request = req
 	nextStepSpider.NextStep = Analysis(nextStep)
+	nextStepSpider.SonSpider = true
 	nextStepSpider.Registered()
 }
 

@@ -33,10 +33,12 @@ func NewEngine() *Engine {
 	engine := new(Engine)
 
 	//初始化各个组件
-	engine.taskPool     = julyTaskPool.NewTaskPool(2,50,false)
+	engine.taskPool     = julyTaskPool.NewTaskPool(100,50,false)
 	engine.requestQueue = julyScheduler.NewQueue(engine.queuePullHandle,engine.queueAfterPushHandle)
 	engine.crawler      = JulySpider.NewCrawler()
 	engine.crawler.SetCrawlerHandle(engine.crawlerPullHandle,engine.crawlerPushHandle)
+	engine.crawler.CrawlerPushRequestHandle = engine.downloadHTML
+
 	engine.downLoad = julyNet.NewDownLoad()
 	engine.downLoad.DownFinishHandle = engine.downFinishHandle
 
@@ -67,30 +69,16 @@ func (engine *Engine)CloseEngine()  {
 
 //监听Crawler，如果有数据立刻处理
 func (engine *Engine)listenCrawler(){
-	//fmt.Println("监听Crawler")
-	//crawler := engine.crawler
-	//
-	//engine.taskPool.SubmitTask(func() error {
-	//	for  {
-	//		spiders := crawler.GetSpiders()
-	//		if len(spiders)>0 {
-	//			crawler.PullSpider()
-	//		}
-	//	}
-	//	return nil
-	//})
+
 }
 
 //添加数据到Queue
 func (engine *Engine)pushRequestToQueue(request *julyNet.CrawlRequest)  {
-	//fmt.Println("添加数据",request.Url)
-	//engine.taskPool.SubmitTask(func() error {
-	//	//time.Sleep(2*time.Second)
-	//
-	//	return nil
-	//})
+
 	engine.requestQueue.PushRequest(request)
 }
+
+
 
 //下载HTML
 func (engine *Engine)downloadHTML(req *julyNet.CrawlRequest)  {
@@ -122,10 +110,6 @@ func (engine *Engine)crawlerPushHandle() {
 	fmt.Println("入队")
 
 	engine.taskPool.SubmitTask(func() error {
-		//spiders := engine.crawler.GetSpiders()
-		//if len(spiders)>0 {
-		//
-		//}
 		engine.crawler.PullSpider()
 		return nil
 	})

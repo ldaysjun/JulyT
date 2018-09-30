@@ -10,13 +10,9 @@ import (
 
 func parseddd(node *Xpath.Node,spider *JulySpider.Spider)  {
 	fmt.Println("解析1")
-
-
 	path := Xpath.MustCompile("//*[@id=\"main\"]/article/header/h1/a")
 	result,_ := path.String(node)
 	fmt.Println("输出结果：",result)
-
-
 }
 
 var ch = make(chan int)
@@ -29,27 +25,26 @@ func parsedd(node *Xpath.Node,spider *JulySpider.Spider)  {
 	for it.Next() {
 		titlePath := Xpath.MustCompile("a/@title")
 		urlPath := Xpath.MustCompile("a/@href")
-		url,_ := urlPath.String(it.Node())
 		fmt.Println(titlePath.String(it.Node()))
 		fmt.Println(urlPath.String(it.Node()))
-		url = "http://lastdays.cn" + url
-
-		spider.RunNextStep(url,analysisData)
-
-
 		fmt.Println("=======+==========")
+		url,_:= urlPath.String(it.Node())
+
+		spider.RunNextStep("http://lastdays.cn"+url,analysisData)
 	}
 
 	fmt.Println("一页===========================")
 	nextPath := Xpath.MustCompile("//*[@id=\"page-nav\"]/a[@class=\"extend next\"]/@href")
 	if nextPath.Exists(node) {
+		fmt.Println("执行")
 		url,_ := nextPath.String(node)
 		spider.Request.Url = "http://lastdays.cn"+url
-		spider.Registered()
+		spider.RunNextStep("http://lastdays.cn"+url,parsedd)
 	}
 }
 
 func analysisData(node *Xpath.Node,spider *JulySpider.Spider)  {
+	fmt.Println("analysisData")
 	titlePath := Xpath.MustCompile("//*[@id=\"main\"]/article/header/h1/a")
 	title,_:= titlePath.String(node)
 	fmt.Println("详情页数据：",title)
