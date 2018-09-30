@@ -135,16 +135,16 @@ func (engine *Engine)crawlerPushHandle() {
 //下载完成处理
 func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
 	body,err:= ioutil.ReadAll(rsp.Body)
-	inputReader := strings.NewReader(string(body))
-	node,err:=Xpath.ParseHTML(inputReader)
-
-
 	if err != nil {
-		fmt.Println("xmlpath parse file failed!!!")
+		log.Println(err.Error())
 		return
 	}
+
+	inputReader := strings.NewReader(string(body))
+	node,err:=Xpath.ParseHTML(inputReader)
 	if err!=nil {
 		log.Println(err.Error())
+		return
 	}
 	spiders := engine.crawler.Process
 	spider := spiders[uuid]

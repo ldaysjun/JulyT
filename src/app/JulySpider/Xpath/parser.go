@@ -2,7 +2,6 @@ package Xpath
 
 import (
 	"encoding/xml"
-	"fmt"
 	"io"
 	"strings"
 )
@@ -194,7 +193,6 @@ func ParseDecoder(d *xml.Decoder) (*Node, error) {
 			break
 		}
 		if err != nil {
-			fmt.Println("错误信息:", err.Error())
 			return nil, err
 		}
 		switch t := t.(type) {

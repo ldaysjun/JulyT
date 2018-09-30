@@ -19,13 +19,13 @@ func parseddd(node *Xpath.Node,spider *JulySpider.Spider)  {
 
 }
 
-
+var ch = make(chan int)
 func parsedd(node *Xpath.Node,spider *JulySpider.Spider)  {
 
 	path := Xpath.MustCompile("//*[@id=\"archive-page\"]/section")
 	it := path.Iter(node)
-	ch :=make(chan int)
-	ch<-1
+
+
 	for it.Next() {
 		titlePath := Xpath.MustCompile("a/@title")
 		urlPath := Xpath.MustCompile("a/@href")
@@ -33,14 +33,14 @@ func parsedd(node *Xpath.Node,spider *JulySpider.Spider)  {
 		fmt.Println(titlePath.String(it.Node()))
 		fmt.Println(urlPath.String(it.Node()))
 		url = "http://lastdays.cn" + url
-		//spider.NextStep = JulySpider.Analysis(analysisData)
+
 		spider.RunNextStep(url,analysisData)
-		//v:=<-ch
-		//fmt.Println(v)
+
 
 		fmt.Println("=======+==========")
 	}
 
+	fmt.Println("一页===========================")
 	nextPath := Xpath.MustCompile("//*[@id=\"page-nav\"]/a[@class=\"extend next\"]/@href")
 	if nextPath.Exists(node) {
 		url,_ := nextPath.String(node)
@@ -73,24 +73,6 @@ func main()  {
 		spider2.Request = req2
 		spider2.Registered()
 	}
-
-
-	//req:=new(julyNet.CrawlRequest)
-	//req.Url = "test"
-	//
-	//spider1 := new(JulySpider.Spider)
-	//spider1.Request = req
-	//
-	//
-	//spider2 := JulySpider.Spider{}
-	//spider2.Request =  spider1.Request
-	//spider2.Request.Url  = "变卦"
-	//
-	//
-	//fmt.Println(spider1.Request)
-	//fmt.Println(spider2.Request)
-
-
 	complete <- 0
 }
 
