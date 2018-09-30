@@ -2,6 +2,7 @@ package julyEngine
 
 import (
 	"app/JulySpider"
+	"app/JulySpider/Xpath"
 	"app/julyNet"
 	"app/julyScheduler"
 	"app/julyTaskPool"
@@ -9,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 )
 
@@ -31,7 +33,7 @@ func NewEngine() *Engine {
 	engine := new(Engine)
 
 	//初始化各个组件
-	engine.taskPool     = julyTaskPool.NewTaskPool(1000,50,false)
+	engine.taskPool     = julyTaskPool.NewTaskPool(2,50,false)
 	engine.requestQueue = julyScheduler.NewQueue(engine.queuePullHandle,engine.queueAfterPushHandle)
 	engine.crawler      = JulySpider.NewCrawler()
 	engine.crawler.SetCrawlerHandle(engine.crawlerPullHandle,engine.crawlerPushHandle)
@@ -133,17 +135,26 @@ func (engine *Engine)crawlerPushHandle() {
 //下载完成处理
 func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
 	body,err:= ioutil.ReadAll(rsp.Body)
+	inputReader := strings.NewReader(string(body))
+	node,err:=Xpath.ParseHTML(inputReader)
+
+
+	if err != nil {
+		fmt.Println("xmlpath parse file failed!!!")
+		return
+	}
 	if err!=nil {
 		log.Println(err.Error())
 	}
 	spiders := engine.crawler.Process
 	spider := spiders[uuid]
 	if spider != nil && spider.Parse!=nil{
-		fmt.Println("当前uuid：",uuid)
-		spider.Parse.Parse(string(body))
+		spider.Parse.Parse(node,spider)
+	}
+	if spider !=nil && spider.NextStep!=nil {
+		spider.NextStep.Next(node,spider)
 	}
 }
-
 
 
 

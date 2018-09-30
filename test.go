@@ -6,21 +6,13 @@ import (
 	"app/julyEngine"
 	"app/julyNet"
 	"fmt"
-	"strings"
 )
 
-func parseddd(body string)  {
+func parseddd(node *Xpath.Node,spider *JulySpider.Spider)  {
 	fmt.Println("解析1")
 
-	inputReader := strings.NewReader(string(body))
-	node,err:=Xpath.ParseHTML(inputReader)
 
-	if err != nil {
-		fmt.Println("xmlpath parse file failed!!!")
-		return
-	}
-
-	path := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
+	path := Xpath.MustCompile("//*[@id=\"main\"]/article/header/h1/a")
 	result,_ := path.String(node)
 	fmt.Println("输出结果：",result)
 
@@ -28,44 +20,41 @@ func parseddd(body string)  {
 }
 
 
-func parsedd(body string)  {
-	fmt.Println("解析2")
+func parsedd(node *Xpath.Node,spider *JulySpider.Spider)  {
 
-	inputReader := strings.NewReader(string(body))
-	node,err:=Xpath.ParseHTML(inputReader)
-
-
-	if err != nil {
-		fmt.Println("xmlpath parse file failed!!!")
-		return
-	}
 	path := Xpath.MustCompile("//*[@id=\"archive-page\"]/section")
 	it := path.Iter(node)
-
+	ch :=make(chan int)
+	ch<-1
 	for it.Next() {
 		titlePath := Xpath.MustCompile("a/@title")
 		urlPath := Xpath.MustCompile("a/@href")
+		url,_ := urlPath.String(it.Node())
 		fmt.Println(titlePath.String(it.Node()))
 		fmt.Println(urlPath.String(it.Node()))
+		url = "http://lastdays.cn" + url
+		//spider.NextStep = JulySpider.Analysis(analysisData)
+		spider.RunNextStep(url,analysisData)
+		//v:=<-ch
+		//fmt.Println(v)
+
 		fmt.Println("=======+==========")
 	}
-	
-	nextpath := Xpath.MustCompile("//*[@id=\"page-nav\"]/a[@class=\"extend next\"]/@href")
-	fmt.Println(nextpath.String(node))
-	if nextpath.Exists(node) {
-		fmt.Println("存在下一页")
-		url,_ := nextpath.String(node)
-		fmt.Println(url)
-		req2 := new(julyNet.CrawlRequest)
-		req2.Url = "http://lastdays.cn"+url
-		req2.NotFilter = true
-		spider2 := new(JulySpider.Spider)
-		spider2.SpiderName = "测试1"
-		spider2.Parse = JulySpider.Parse(parsedd)
-		spider2.Request = req2
-		spider2.Registered()
+
+	nextPath := Xpath.MustCompile("//*[@id=\"page-nav\"]/a[@class=\"extend next\"]/@href")
+	if nextPath.Exists(node) {
+		url,_ := nextPath.String(node)
+		spider.Request.Url = "http://lastdays.cn"+url
+		spider.Registered()
 	}
 }
+
+func analysisData(node *Xpath.Node,spider *JulySpider.Spider)  {
+	titlePath := Xpath.MustCompile("//*[@id=\"main\"]/article/header/h1/a")
+	title,_:= titlePath.String(node)
+	fmt.Println("详情页数据：",title)
+}
+
 
 var complete chan int = make(chan int)
 
@@ -76,14 +65,32 @@ func main()  {
 
 	for i:=0;i<1; i++ {
 		req2 := new(julyNet.CrawlRequest)
-		req2.Url = "http://lastdays.cn/archives/page/2/"
+		req2.Url = "http://lastdays.cn/archives"
 		req2.NotFilter = true
 		spider2 := new(JulySpider.Spider)
 		spider2.SpiderName = "测试1"
-		spider2.Parse = JulySpider.Parse(parsedd)
+		spider2.Parse = JulySpider.Analysis(parsedd)
 		spider2.Request = req2
 		spider2.Registered()
 	}
+
+
+	//req:=new(julyNet.CrawlRequest)
+	//req.Url = "test"
+	//
+	//spider1 := new(JulySpider.Spider)
+	//spider1.Request = req
+	//
+	//
+	//spider2 := JulySpider.Spider{}
+	//spider2.Request =  spider1.Request
+	//spider2.Request.Url  = "变卦"
+	//
+	//
+	//fmt.Println(spider1.Request)
+	//fmt.Println(spider2.Request)
+
+
 	complete <- 0
 }
 
