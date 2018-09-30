@@ -41,7 +41,6 @@ func parsedd(body string)  {
 	}
 	path := Xpath.MustCompile("//*[@id=\"archive-page\"]/section")
 	it := path.Iter(node)
-	fmt.Println(it)
 
 	for it.Next() {
 		titlePath := Xpath.MustCompile("a/@title")
@@ -50,8 +49,22 @@ func parsedd(body string)  {
 		fmt.Println(urlPath.String(it.Node()))
 		fmt.Println("=======+==========")
 	}
-
-
+	
+	nextpath := Xpath.MustCompile("//*[@id=\"page-nav\"]/a[@class=\"extend next\"]/@href")
+	fmt.Println(nextpath.String(node))
+	if nextpath.Exists(node) {
+		fmt.Println("存在下一页")
+		url,_ := nextpath.String(node)
+		fmt.Println(url)
+		req2 := new(julyNet.CrawlRequest)
+		req2.Url = "http://lastdays.cn"+url
+		req2.NotFilter = true
+		spider2 := new(JulySpider.Spider)
+		spider2.SpiderName = "测试1"
+		spider2.Parse = JulySpider.Parse(parsedd)
+		spider2.Request = req2
+		spider2.Registered()
+	}
 }
 
 var complete chan int = make(chan int)
@@ -63,7 +76,7 @@ func main()  {
 
 	for i:=0;i<1; i++ {
 		req2 := new(julyNet.CrawlRequest)
-		req2.Url = "http://lastdays.cn/archives/"
+		req2.Url = "http://lastdays.cn/archives/page/2/"
 		req2.NotFilter = true
 		spider2 := new(JulySpider.Spider)
 		spider2.SpiderName = "测试1"
@@ -71,7 +84,6 @@ func main()  {
 		spider2.Request = req2
 		spider2.Registered()
 	}
-
 	complete <- 0
 }
 
