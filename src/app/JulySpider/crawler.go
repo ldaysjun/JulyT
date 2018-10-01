@@ -4,6 +4,7 @@ import (
 	//"github.com/google/uuid"
 	//"strconv"
 	"app/julyNet"
+	"fmt"
 	"sync"
 )
 
@@ -36,16 +37,17 @@ func NewCrawler() *Crawler{
 
 //spider入队、如果需要异步入队，需要加锁
 func (crawler *Crawler)PushSpider(spider *Spider)  {
+	fmt.Println("PushSpider:",spider)
 	crawler.matrix.pushSpider(spider)
 
 	if spider.SonSpider {
 		if crawler.CrawlerPushRequestHandle!=nil {
 			crawler.CrawlerPushRequestHandle(spider.Request)
 		}
-	}
-
-	if crawler.crawlerPushHandle != nil{
-		crawler.crawlerPushHandle()
+	}else {
+		if crawler.crawlerPushHandle != nil{
+			crawler.crawlerPushHandle()
+		}
 	}
 }
 

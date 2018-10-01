@@ -27,29 +27,32 @@ func parsedd(node *Xpath.Node,spider *JulySpider.Spider)  {
 		urlPath := Xpath.MustCompile("a/@href")
 		fmt.Println(titlePath.String(it.Node()))
 		fmt.Println(urlPath.String(it.Node()))
-		fmt.Println("=======+==========")
-		url,_:= urlPath.String(it.Node())
+		//url,_:= urlPath.String(it.Node())
+		title,_:= titlePath.String(it.Node())
+		fmt.Println(spider.Request.UUID+":"+title)
 
-		spider.RunNextStep("http://lastdays.cn"+url,analysisData)
+		//spider.RunNextStep("http://lastdays.cn"+url,analysisData)
 	}
+	fmt.Println("==============================================")
 
-	fmt.Println("一页===========================")
 	nextPath := Xpath.MustCompile("//*[@id=\"page-nav\"]/a[@class=\"extend next\"]/@href")
 	if nextPath.Exists(node) {
 		fmt.Println("执行")
 		url,_ := nextPath.String(node)
-		spider.Request.Url = "http://lastdays.cn"+url
-		spider.RunNextStep("http://lastdays.cn"+url,parsedd)
+		spider.RunNextStep("http://lastdays.cn"+url,analysisData)
 	}
 }
 
 func analysisData(node *Xpath.Node,spider *JulySpider.Spider)  {
-	fmt.Println("analysisData")
-	titlePath := Xpath.MustCompile("//*[@id=\"main\"]/article/header/h1/a")
-	title,_:= titlePath.String(node)
-	fmt.Println("详情页数据：",title)
+	fmt.Println("test analysisData")
 }
 
+//func analysisData(node *Xpath.Node,spider *JulySpider.Spider)  {
+//	fmt.Println("analysisData")
+//	titlePath := Xpath.MustCompile("//*[@id=\"main\"]/article/header/h1/a")
+//	title,_:= titlePath.String(node)
+//	fmt.Println("详情页数据：",title)
+//}
 
 var complete chan int = make(chan int)
 
@@ -58,7 +61,7 @@ func main()  {
 	fmt.Println("开始测试")
 	julyEngine.Run()
 
-	for i:=0;i<1; i++ {
+	for i:=0;i<2; i++ {
 		req2 := new(julyNet.CrawlRequest)
 		req2.Url = "http://lastdays.cn/archives"
 		req2.NotFilter = true
@@ -67,10 +70,9 @@ func main()  {
 		spider2.Parse = JulySpider.Analysis(parsedd)
 		spider2.Request = req2
 		spider2.Registered()
+		fmt.Println("第一个处理结束========================")
 	}
 	complete <- 0
 }
-
-
 
 

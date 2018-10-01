@@ -33,11 +33,11 @@ func NewEngine() *Engine {
 	engine := new(Engine)
 
 	//初始化各个组件
-	engine.taskPool     = julyTaskPool.NewTaskPool(100,50,false)
+	engine.taskPool     = julyTaskPool.NewTaskPool(1,50,false)
 	engine.requestQueue = julyScheduler.NewQueue(engine.queuePullHandle,engine.queueAfterPushHandle)
 	engine.crawler      = JulySpider.NewCrawler()
 	engine.crawler.SetCrawlerHandle(engine.crawlerPullHandle,engine.crawlerPushHandle)
-	engine.crawler.CrawlerPushRequestHandle = engine.downloadHTML
+	engine.crawler.CrawlerPushRequestHandle = engine.pushRequestToQueue
 
 	engine.downLoad = julyNet.NewDownLoad()
 	engine.downLoad.DownFinishHandle = engine.downFinishHandle
@@ -74,7 +74,7 @@ func (engine *Engine)listenCrawler(){
 
 //添加数据到Queue
 func (engine *Engine)pushRequestToQueue(request *julyNet.CrawlRequest)  {
-
+	fmt.Println("呼呼哈嘿：",request.Url)
 	engine.requestQueue.PushRequest(request)
 }
 
@@ -118,6 +118,8 @@ func (engine *Engine)crawlerPushHandle() {
 /*Download相关处理函数*/
 //下载完成处理
 func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
+
+	engine.lock.Lock()
 	body,err:= ioutil.ReadAll(rsp.Body)
 	if err != nil {
 		log.Println(err.Error())
@@ -132,12 +134,23 @@ func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
 	}
 	spiders := engine.crawler.Process
 	spider := spiders[uuid]
+	engine.lock.Unlock()
 	if spider != nil && spider.Parse!=nil{
+		fmt.Println("执行Parse")
 		spider.Parse.Parse(node,spider)
 	}
 	if spider !=nil && spider.NextStep!=nil {
+		fmt.Println("执行NextStep")
 		spider.NextStep.Next(node,spider)
 	}
+	if spider == nil {
+		fmt.Println("spider数据为空")
+	}
+	if spider.NextStep.Next == nil {
+		fmt.Println("NextStep为空")
+		fmt.Println(spider.NextStep)
+	}
+	fmt.Println(spider.Request.UUID)
 }
 
 

@@ -1,6 +1,7 @@
 package JulySpider
 
 import (
+	"fmt"
 	"sync"
 	"sync/atomic"
 )
@@ -28,9 +29,18 @@ func (matrix *Matrix)pushSpider(spider *Spider){
 	matrix.lock.Lock()
 	defer matrix.lock.Unlock()
 
-	//添加请求到队列
-	matrix.spiders = append(matrix.spiders, spider)
-	atomic.AddInt32(&matrix.resCount,1)
+	if !spider.SonSpider {
+		//添加请求到队列
+		matrix.spiders = append(matrix.spiders, spider)
+		atomic.AddInt32(&matrix.resCount,1)
+	}else {
+		//将数据加到待处理
+		if _,found:=crawler.Process[spider.Request.UUID];!found {
+			fmt.Println("pullSpider:",spider.Request.UUID)
+			crawler.Process[spider.Request.UUID] = spider
+		}
+	}
+
 }
 
 func (matrix *Matrix)pullSpider() *Spider{
@@ -47,11 +57,11 @@ func (matrix *Matrix)pullSpider() *Spider{
 
 	//将数据加到待处理
 	if _,found:=crawler.Process[spider.Request.UUID];!found {
+		fmt.Println("pullSpider:",spider.Request.UUID)
 		crawler.Process[spider.Request.UUID] = spider
 	}
 
 	atomic.AddInt32(&matrix.resCount,-1)
-
 	return spider
 }
 
