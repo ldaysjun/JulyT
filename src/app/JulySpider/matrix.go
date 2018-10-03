@@ -36,11 +36,10 @@ func (matrix *Matrix)pushSpider(spider *Spider){
 	}else {
 		//将数据加到待处理
 		if _,found:=crawler.Process[spider.Request.UUID];!found {
-			fmt.Println("pullSpider:",spider.Request.UUID)
+			fmt.Println("Matrix pushSonSpider:",spider.Request.UUID)
 			crawler.Process[spider.Request.UUID] = spider
 		}
 	}
-
 }
 
 func (matrix *Matrix)pullSpider() *Spider{
@@ -57,7 +56,7 @@ func (matrix *Matrix)pullSpider() *Spider{
 
 	//将数据加到待处理
 	if _,found:=crawler.Process[spider.Request.UUID];!found {
-		fmt.Println("pullSpider:",spider.Request.UUID)
+		fmt.Println("真的是这里 pullSpider:",spider.Request.UUID)
 		crawler.Process[spider.Request.UUID] = spider
 	}
 

@@ -37,11 +37,11 @@ func NewCrawler() *Crawler{
 
 //spider入队、如果需要异步入队，需要加锁
 func (crawler *Crawler)PushSpider(spider *Spider)  {
-	fmt.Println("PushSpider:",spider)
 	crawler.matrix.pushSpider(spider)
 
 	if spider.SonSpider {
 		if crawler.CrawlerPushRequestHandle!=nil {
+			fmt.Println("PushSpider 加入SonSpider")
 			crawler.CrawlerPushRequestHandle(spider.Request)
 		}
 	}else {

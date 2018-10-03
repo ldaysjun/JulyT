@@ -29,12 +29,12 @@ func (t *TaskNode) run() {
 
 		for task := range t.task {
 			if task == nil {
-				fmt.Println("break")
+				//fmt.Println("break")
 				break
 			}
 
 			if t.isIdel {
-				fmt.Println("使用复用节点")
+				//fmt.Println("使用复用节点")
 			}
 			//执行任务
 			task()
@@ -102,7 +102,7 @@ func (p *TaskPool) SubmitTask(task funcTask) error {
 	}
 
 	if p.isUseCache {
-		fmt.Println("使用cache")
+		//fmt.Println("使用cache")
 		p.cacheTask(task)
 	} else {
 		taskNode := p.getTaskNode()
@@ -139,7 +139,7 @@ func (p *TaskPool) getTaskNode() *TaskNode {
 
 	if len(p.taskNodes) > 0 {
 		//取出空闲队列最后可用节点
-		fmt.Println("存在空闲队列：%d", len(p.taskNodes))
+		//fmt.Println("存在空闲队列：%d", len(p.taskNodes))
 		t = p.getNodeFromTaskNodes()
 	} else {
 		//当前任务池还有空间
@@ -225,7 +225,7 @@ func (p *TaskPool) idleNodeGC() {
 			if nowTime.Sub(t.recentUsageTime) <= p.expiredDuration {
 				break
 			}
-			fmt.Println("开始回收")
+			//fmt.Println("开始回收")
 			n = i
 			t.task <- nil
 			tempNodes[i] = nil
