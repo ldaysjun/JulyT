@@ -4,7 +4,6 @@ import (
 	//"github.com/google/uuid"
 	//"strconv"
 	"app/julyNet"
-	"fmt"
 	"sync"
 )
 
@@ -41,7 +40,6 @@ func (crawler *Crawler)PushSpider(spider *Spider)  {
 
 	if spider.SonSpider {
 		if crawler.CrawlerPushRequestHandle!=nil {
-			fmt.Println("PushSpider 加入SonSpider")
 			crawler.CrawlerPushRequestHandle(spider.Request)
 		}
 	}else {

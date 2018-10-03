@@ -39,9 +39,7 @@ func (spider *Spider)RunNextStep(url string,nextStep func(node *Xpath.Node,spide
 }
 
 func (spider *Spider)ParseHandleTest(node *Xpath.Node)  {
-	//fmt.Println("到了这里")
 		if spider.ParseHandle != nil {
-			//fmt.Println("ParseHandle")
 			spider.ParseHandle(node,spider)
 		}
 }

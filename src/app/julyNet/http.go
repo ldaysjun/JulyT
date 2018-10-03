@@ -22,7 +22,6 @@ func NewJulyHttp() Downer {
 }
 
 func parseddd(body string)  {
-	//fmt.Println("测试代码走起")
 	inputReader := strings.NewReader(string(body))
 	node,err:=Xpath.ParseHTML(inputReader)
 
@@ -45,7 +44,6 @@ func parseddd(body string)  {
 
 	path2 := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
 	fmt.Println(path2.String(node2))
-	//fmt.Println("完成2")
 
 }
 

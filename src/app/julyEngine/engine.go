@@ -33,7 +33,7 @@ func NewEngine() *Engine {
 	engine := new(Engine)
 
 	//初始化各个组件
-	engine.taskPool     = julyTaskPool.NewTaskPool(5,50,false)
+	engine.taskPool     = julyTaskPool.NewTaskPool(1,50,false)
 	engine.requestQueue = julyScheduler.NewQueue(engine.queuePullHandle,engine.queueAfterPushHandle)
 	engine.crawler      = JulySpider.NewCrawler()
 	engine.crawler.SetCrawlerHandle(engine.crawlerPullHandle,engine.crawlerPushHandle)
@@ -74,7 +74,6 @@ func (engine *Engine)listenCrawler(){
 
 //添加数据到Queue
 func (engine *Engine)pushRequestToQueue(request *julyNet.CrawlRequest)  {
-	fmt.Println("加入数据pushRequestToQueue",request.UUID)
 	engine.requestQueue.PushRequest(request)
 }
 
@@ -117,7 +116,6 @@ func (engine *Engine)crawlerPushHandle() {
 /*Download相关处理函数*/
 //下载完成处理
 func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
-	fmt.Println("downFinishHandle downFinishHandle")
 	engine.lock.Lock()
 	body,err:= ioutil.ReadAll(rsp.Body)
 	if err != nil {
@@ -135,27 +133,9 @@ func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
 	spider := spiders[uuid]
 	engine.lock.Unlock()
 
-	fmt.Println("downFinishHandle:",spider.SpiderName)
 	if spider != nil{
-		fmt.Println("ParseHandleTest")
 		spider.ParseHandleTest(node)
 	}
-	//if spider != nil && spider.Parse!=nil{
-	//	fmt.Println("执行Parse")
-	//	spider.Parse.Parse(node,spider)
-	//}
-	//if spider !=nil && spider.NextStep!=nil {
-	//	fmt.Println("执行NextStep")
-	//	spider.NextStep.Next(node,spider)
-	//}
-	//if spider == nil {
-	//	fmt.Println("spider数据为空")
-	//}
-	//if spider.NextStep == nil {
-	//	fmt.Println("NextStep为空")
-	//	fmt.Println(spider.NextStep)
-	//}
-	fmt.Println("这他妈什么情况：",spider.Request.UUID)
 }
 
 

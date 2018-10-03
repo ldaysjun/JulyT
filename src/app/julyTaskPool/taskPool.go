@@ -2,7 +2,6 @@ package julyTaskPool
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -29,12 +28,10 @@ func (t *TaskNode) run() {
 
 		for task := range t.task {
 			if task == nil {
-				//fmt.Println("break")
 				break
 			}
 
 			if t.isIdel {
-				//fmt.Println("使用复用节点")
 			}
 			//执行任务
 			task()
@@ -102,7 +99,6 @@ func (p *TaskPool) SubmitTask(task funcTask) error {
 	}
 
 	if p.isUseCache {
-		//fmt.Println("使用cache")
 		p.cacheTask(task)
 	} else {
 		taskNode := p.getTaskNode()
@@ -139,7 +135,6 @@ func (p *TaskPool) getTaskNode() *TaskNode {
 
 	if len(p.taskNodes) > 0 {
 		//取出空闲队列最后可用节点
-		//fmt.Println("存在空闲队列：%d", len(p.taskNodes))
 		t = p.getNodeFromTaskNodes()
 	} else {
 		//当前任务池还有空间
@@ -151,15 +146,12 @@ func (p *TaskPool) getTaskNode() *TaskNode {
 			p.runningIncrease()
 		} else {
 			//阻塞等待
-			//fmt.Println("进入等待")
 			for {
 				p.lock.Lock()
 				if len(p.taskNodes) <= 0 {
-					//fmt.Println("等待任务节点")
 					p.lock.Unlock()
 					continue
 				}
-				//fmt.Println("获取任务节点")
 				t = p.getNodeFromTaskNodes()
 				p.lock.Unlock()
 
@@ -197,7 +189,6 @@ func (p *TaskPool) taskNodeGC(node *TaskNode) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	fmt.Println("回收节点")
 
 	node.recentUsageTime = time.Now()
 	node.isIdel = true
@@ -225,7 +216,6 @@ func (p *TaskPool) idleNodeGC() {
 			if nowTime.Sub(t.recentUsageTime) <= p.expiredDuration {
 				break
 			}
-			//fmt.Println("开始回收")
 			n = i
 			t.task <- nil
 			tempNodes[i] = nil
