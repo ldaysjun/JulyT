@@ -2,6 +2,7 @@ package julyTaskPool
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -16,22 +17,21 @@ var (
 )
 
 type TaskNode struct {
-	pool   *TaskPool
-	task   chan funcTask
-	isIdel bool
-	//最近最后使用时间
-	recentUsageTime time.Time
+	pool   *TaskPool          //所述任务池
+	task   chan funcTask      //通道
+	isMultiplexing bool       //是否为复用节点
+	recentUsageTime time.Time //最近最后使用时间
 }
 
 func (t *TaskNode) run() {
 	go func() {
-
 		for task := range t.task {
 			if task == nil {
+				fmt.Println("关闭")
 				break
 			}
-
-			if t.isIdel {
+			if t.isMultiplexing {
+				fmt.Println("复用节点")
 			}
 			//执行任务
 			task()
@@ -45,25 +45,15 @@ func (t *TaskNode) run() {
 
 //任务池
 type TaskPool struct {
-
-	//任务池大小
-	poolSize int32
-	//过期时间
-	expiredDuration time.Duration
-	//空闲任务节点
-	taskNodes []*TaskNode
-	//运行中节点数
-	running int32
-	//TaskPool关闭通知
-	closeNotice chan closeSignal
-	//是否使用缓冲队列
-	isUseCache bool
-	//TaskPool 缓冲队列
-	cacheTasks []funcTask
-	//lock
-	lock sync.Mutex
-	//once
-	once sync.Once
+	poolSize int32                  //任务池大小
+	expiredDuration time.Duration 	//过期时间
+	taskNodes []*TaskNode 	        //空闲任务节点
+	running int32 	                //运行中节点数
+	closeNotice chan closeSignal 	//TaskPool关闭通知
+	isUseCache bool 	            //是否使用缓冲队列
+	cacheTasks []funcTask           //TaskPool 缓冲队列
+	lock sync.Mutex                 //lock
+	once sync.Once                  //once
 }
 
 func NewTaskPool(poolSize int32, expiredDuration int, isUseCache bool) *TaskPool {
@@ -181,7 +171,7 @@ func (p *TaskPool) getNodeFromTaskNodes() *TaskNode {
 
 //返回空闲队列
 func (p *TaskPool) taskNodeGC(node *TaskNode) error {
-
+	fmt.Println("回收")
 	if node == nil {
 		return ErrorGCNodeIsNil
 	}
@@ -191,7 +181,7 @@ func (p *TaskPool) taskNodeGC(node *TaskNode) error {
 
 
 	node.recentUsageTime = time.Now()
-	node.isIdel = true
+	node.isMultiplexing = true
 	p.taskNodes = append(p.taskNodes, node)
 
 	return nil
@@ -203,11 +193,9 @@ func (p *TaskPool) idleNodeGC() {
 	ticker := time.NewTicker(p.expiredDuration)
 	tempNodes := p.taskNodes
 	for _= range ticker.C {
+		nowTime := time.Now()
 
 		p.lock.Lock()
-		defer p.lock.Unlock()
-
-		nowTime := time.Now()
 		if len(p.closeNotice) <= 0 {
 			return
 		}
@@ -225,6 +213,7 @@ func (p *TaskPool) idleNodeGC() {
 		} else {
 			p.taskNodes = tempNodes[n+1:]
 		}
+		p.lock.Unlock()
 	}
 }
 

@@ -33,7 +33,7 @@ func NewEngine() *Engine {
 	engine := new(Engine)
 
 	//初始化各个组件
-	engine.taskPool     = julyTaskPool.NewTaskPool(1,50,false)
+	engine.taskPool     = julyTaskPool.NewTaskPool(100,50,false)
 	engine.requestQueue = julyScheduler.NewQueue(engine.queuePullHandle,engine.queueAfterPushHandle)
 	engine.crawler      = JulySpider.NewCrawler()
 	engine.crawler.SetCrawlerHandle(engine.crawlerPullHandle,engine.crawlerPushHandle)

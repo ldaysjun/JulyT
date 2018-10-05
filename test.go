@@ -18,6 +18,7 @@ func parse(node *Xpath.Node,spider *JulySpider.Spider)  {
 	for it.Next() {
 			urlPath := Xpath.MustCompile("a/@href")
 			url,_:= urlPath.String(it.Node())
+			//fmt.Println(url)
 			spider.RunNextStep("http://lastdays.cn"+url,analysisData)
 			}
 
@@ -36,7 +37,7 @@ func analysisData(node *Xpath.Node,spider *JulySpider.Spider)  {
 	}
 	titlePath := Xpath.MustCompile("//*[@id=\"main\"]/article/header/h1/a")
 	title,_:= titlePath.String(node)
-	fmt.Println(spider.Request.Url,":",title)
+	fmt.Println(title)
 }
 
 var complete chan int = make(chan int)
@@ -55,6 +56,18 @@ func main()  {
 		spider2.Request = req2
 		spider2.Registered()
 	}
+	//taskPool     := julyTaskPool.NewTaskPool(100,50,false)
+	//taskPool.SubmitTask(func() error {
+	//	fmt.Println("使用")
+	//	return nil
+	//})
+
+
+
+	fmt.Println("结束")
+
+
+
 	complete <- 0
 }
 
