@@ -72,7 +72,7 @@ func rule(node *Xpath.Node,spider *JulySpider.Spider)  {
 
 
 
-![](/Users/lastdays/Desktop/1.png)
+![](1.png)
 
 
 
