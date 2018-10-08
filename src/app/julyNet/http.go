@@ -1,13 +1,11 @@
 package julyNet
 
 import (
-	"app/JulySpider/Xpath"
 	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
-	"strings"
 	"time"
 )
 
@@ -21,31 +19,6 @@ func NewJulyHttp() Downer {
 	return s
 }
 
-func parseddd(body string)  {
-	inputReader := strings.NewReader(string(body))
-	node,err:=Xpath.ParseHTML(inputReader)
-
-	if err != nil {
-		fmt.Println("xmlpath parse file failed!!!")
-		return
-	}
-
-	path := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
-	fmt.Println(path.String(node))
-
-	//fmt.Println("完成1")
-	inputReader2 := strings.NewReader(string(body))
-	node2,err2:=Xpath.ParseHTML(inputReader2)
-
-	if err2 != nil {
-		fmt.Println("xmlpath parse file failed!!!")
-		return
-	}
-
-	path2 := Xpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
-	fmt.Println(path2.String(node2))
-
-}
 
 func (self *JulyHttp) DownLoad(request *CrawlRequest) (rsp *http.Response, err error) {
 	param, err := CreateParam(request)
@@ -59,23 +32,6 @@ func (self *JulyHttp) DownLoad(request *CrawlRequest) (rsp *http.Response, err e
 	if err != nil {
 		fmt.Println(err)
 	}
-
-
-
-
-	//b,err := ioutil.ReadAll(rsp.Body)
-	//defer rsp.Body.Close()
-	//parseddd(string(b))
-	//inputReader := strings.NewReader(string(b))
-	//node,err := ParseHTML(inputReader)
-	//
-	//if err != nil {
-	//	fmt.Println("xmlpath parse file failed!!!")
-	//	return
-	//}
-	//path := xmlpath.MustCompile("//*[@id=\"main\"]/article[1]/header/h1/a")
-	//fmt.Println(path.String(node))
-
 	return rsp,err
 }
 
@@ -92,7 +48,6 @@ func (self *JulyHttp) createClient(param *Param) *http.Client {
 			return conn, nil
 		},
 	}
-
 
 	if param.url.Scheme == "https" {
 		transparent.TLSClientConfig = &tls.Config{RootCAs: nil, InsecureSkipVerify: true}
@@ -112,7 +67,6 @@ func (self *JulyHttp) createClient(param *Param) *http.Client {
 }
 
 func (self *JulyHttp) httpRequest(param *Param) (rsp *http.Response, err error) {
-	//fmt.Println("httpRequest：",)
 
 	req, err := http.NewRequest(param.method, param.url.String(), param.body)
 	if err != nil {
