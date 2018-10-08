@@ -41,7 +41,6 @@ func NewQueue(pullHandle PullRequestHandle,pushHandle PushRequestHandle)  *Queue
 
 func (queue *Queue)PushRequest(request *julyNet.CrawlRequest)  {
 	queue.matrix.addRequest(request)
-
 	if queue.pushHandle != nil {
 		queue.pushHandle()
 	}
@@ -49,7 +48,6 @@ func (queue *Queue)PushRequest(request *julyNet.CrawlRequest)  {
 
 
 func (queue *Queue)PullRequest() (request *julyNet.CrawlRequest){
-
 	request =queue.matrix.pullRequest()
 	if request!=nil && queue.pullHandle!=nil{
 		queue.pullHandle(request)
