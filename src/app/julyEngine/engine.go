@@ -116,7 +116,7 @@ func (engine *Engine)crawlerPushHandle() {
 /*Download相关处理函数*/
 //下载完成处理
 func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
-	engine.lock.Lock()
+
 	body,err:= ioutil.ReadAll(rsp.Body)
 	if err != nil {
 		log.Println(err.Error())
@@ -130,6 +130,7 @@ func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
 		//return
 	}
 	spiders := engine.crawler.Process
+	engine.lock.Lock()
 	spider := spiders[uuid]
 	engine.lock.Unlock()
 
