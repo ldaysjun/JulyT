@@ -26,3 +26,4 @@ func (analysis Analysis)Next(node *Xpath.Node,spider *Spider)  {
 
 
 
+

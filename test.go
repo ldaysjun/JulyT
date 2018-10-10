@@ -6,7 +6,9 @@ import (
 	"app/julyEngine"
 	"app/julyNet"
 	"fmt"
+	"runtime"
 	"strconv"
+	"strings"
 )
 
 var ch = make(chan int)
@@ -14,11 +16,11 @@ func parse(node *Xpath.Node,spider *JulySpider.Spider)  {
 
 	path := Xpath.MustCompile("//*[@id=\"archive-page\"]/section")
 	it := path.Iter(node)
+	fmt.Println(GoID)
 
 	for it.Next() {
 			urlPath := Xpath.MustCompile("a/@href")
 			url,_:= urlPath.String(it.Node())
-			//fmt.Println(url)
 			spider.RunNextStep("http://lastdays.cn"+url,analysisData)
 			}
 
@@ -35,6 +37,7 @@ func analysisData(node *Xpath.Node,spider *JulySpider.Spider)  {
 	if node == nil {
 		return
 	}
+	fmt.Println(GoID)
 	titlePath := Xpath.MustCompile("//*[@id=\"main\"]/article/header/h1/a")
 	title,_:= titlePath.String(node)
 	fmt.Println(title)
@@ -45,7 +48,7 @@ var complete chan int = make(chan int)
 //测试任务池
 func main()  {
 	julyEngine.Run()
-	for i:=0;i<10; i++ {
+	for i:=0;i<1; i++ {
 		req2 := new(julyNet.CrawlRequest)
 		req2.Url = "http://lastdays.cn/archives"
 		req2.NotFilter = true
@@ -56,19 +59,21 @@ func main()  {
 		spider2.Request = req2
 		spider2.Registered()
 	}
-	//taskPool     := julyTaskPool.NewTaskPool(100,50,false)
-	//taskPool.SubmitTask(func() error {
-	//	fmt.Println("使用")
-	//	return nil
-	//})
-
-
-
-	fmt.Println("结束")
-
 
 
 	complete <- 0
 }
 
+
+func GoID() int {
+	var buf [64]byte
+	n := runtime.Stack(buf[:], false)
+	idField := strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]
+	id, err := strconv.Atoi(idField)
+	if err != nil {
+		panic(fmt.Sprintf("cannot get goroutine id: %v", err))
+	}
+
+	return id
+}
 

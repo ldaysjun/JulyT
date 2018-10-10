@@ -7,13 +7,12 @@ import (
 )
 
 type Spider struct {
-	Parse Analysis    //处理入口
-	NextStep Analysis //下一步处理
-	SpiderName string //Spider名字
-	SonSpider bool
-	Request *julyNet.CrawlRequest
+	//NextStep   Analysis    //下一步处理
+	SpiderName string      //Spider名字
+	SonSpider  bool        //是否为子SonSpider
+	Request    *julyNet.CrawlRequest
 
-	ParseHandle func(node *Xpath.Node,spider *Spider)
+	ParseHandle func(node *Xpath.Node,spider *Spider) //解析处理
 }
 
 //像crawler注册

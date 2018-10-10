@@ -63,7 +63,6 @@ func (matrix *Matrix)pullSpider() *Spider{
 
 func (matrix *Matrix)getSpiders() []*Spider{
 
-
 	return matrix.spiders
 }
 
