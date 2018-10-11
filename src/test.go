@@ -57,7 +57,6 @@ func main()  {
 		spider2.Registered()
 	}
 
-
 	complete <- 0
 }
 
