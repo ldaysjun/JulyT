@@ -122,12 +122,12 @@ func (engine *Engine)downFinishHandle(rsp *http.Response,uuid string){
 		log.Println(err.Error())
 		return
 	}
+	//fmt.Println(string(body))
 
 	inputReader := strings.NewReader(string(body))
 	node,err:=Xpath.ParseHTML(inputReader)
 	if err!=nil {
-		log.Println(err.Error())
-		//return
+		log.Println("错误信息:",err.Error())
 	}
 	spiders := engine.crawler.Process
 	engine.lock.Lock()

@@ -23,6 +23,7 @@ func (d *Downloader)DownLoad(req *CrawlRequest) (rsp *http.Response, err error) 
 		fmt.Println(err.Error())
 		return
 	}
+
 	if d.DownFinishHandle !=nil {
 		d.DownFinishHandle(rsp,req.UUID)
 	}
